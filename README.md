@@ -79,11 +79,7 @@ KOD_JOBS/
 ### Dashboard View
 ![Dashboard](/public/images/dashboard.png)
 
-### Job Listings
-![Jobs List](/public/images/jobs.png)
 
-### User Profile
-![Profile](/public/images/profile.png)
 
 ## API Usage
 This project fetches job listings from the **Muse API**. Ensure you have a valid API key and update the `.env` file accordingly.
