@@ -10,7 +10,7 @@ const Dashboard = () => {
       try {
         const response = await axios.get('https://www.themuse.com/api/public/jobs', {
           params: {
-            api_key: 'ur api key',
+            api_key: '7f68683d31e3bd05f43d0596c8c19f81a26abf357046ffd6ce5747a3eed25492',
             page: 1
           }
         });

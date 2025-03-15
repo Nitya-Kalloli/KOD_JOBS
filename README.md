@@ -64,6 +64,27 @@ KOD_JOBS/
    npm start
    ```
 
+
+## Application Screenshots
+
+### Home Page
+![Home Page](/public/images/home.png)
+
+### Login Interface
+![Login Page](/public/images/login.png)
+
+### Sign Up Form
+![Signup Page](/public/images/signup.png)
+
+### Dashboard View
+![Dashboard](/public/images/dashboard.png)
+
+### Job Listings
+![Jobs List](/public/images/jobs.png)
+
+### User Profile
+![Profile](/public/images/profile.png)
+
 ## API Usage
 This project fetches job listings from the **Muse API**. Ensure you have a valid API key and update the `.env` file accordingly.
 
@@ -75,4 +96,6 @@ Feel free to contribute by submitting issues or pull requests.
 
 ## License
 This project is licensed under the MIT License.
+
+
 
