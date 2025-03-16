@@ -79,6 +79,15 @@ KOD_JOBS/
 ### Dashboard View
 ![Dashboard](/public/images/dashboard.png)
 
+### Dashboard Styling and Features
+
+#### Job Level Color Coding
+- Entry Level: Light Blue (#E3F2FD)
+- Mid Level: Sage Green (#E8F5E9)
+- Senior Level: Soft Purple (#F3E5F5)
+
+#### Filter Implementation
+The dashboard includes a comprehensive filtering system:
 
 
 ## API Usage

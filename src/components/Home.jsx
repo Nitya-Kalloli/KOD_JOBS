@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import users from '../users.json';
 
 const inputStyles = "w-72 p-2 rounded-lg bg-slate-800/50 border border-slate-600 focus:border-slate-400 outline-none transition-colors duration-300 text-sm placeholder:text-slate-500";
 const buttonStyles = "w-72 p-2 rounded-lg font-semibold transition-all duration-300 text-sm";
@@ -65,48 +64,44 @@ const Home = () => {
     return age;
   };
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     
-    if (!signupData.name.trim() || !signupData.password || !signupData.dob || !signupData.email) {
+    if (!signupData.name || !signupData.password || !signupData.dob || !signupData.email) {
       alert("Please fill all fields");
       return;
     }
 
-    // Calculate age
-    const birthDate = new Date(signupData.dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-
-    // Get existing users or initialize empty array
-    const existingUsers = JSON.parse(localStorage.getItem('users') || '{"users": []}');
-    
-    // Check if username already exists
-    if (existingUsers.users.some(user => user.name === signupData.name)) {
-      alert("Username already exists!");
-      return;
-    }
-
-    const newUser = {
-      id: Date.now(),
-      name: signupData.name,
-      password: signupData.password,
-      dob: signupData.dob,
-      age,
-      email: signupData.email
-    };
-
-    // Add new user to array
-    existingUsers.users.push(newUser);
-    
-    // Save to localStorage
     try {
-      localStorage.setItem('users', JSON.stringify(existingUsers));
+      const response = await fetch('http://localhost:5000/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: signupData.name,
+          password: signupData.password,
+          dob: signupData.dob,
+          email: signupData.email
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create account');
+      }
+
+      // Also store in localStorage for client-side auth
+      const users = JSON.parse(localStorage.getItem('users') || '{"users": []}');
+      users.users.push(data.user);
+      localStorage.setItem('users', JSON.stringify(users));
+
       alert('Account created successfully!');
       navigate('/dashboard');
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to create account');
+      alert(error.message || 'Failed to create account');
     }
   };
 
