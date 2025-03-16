@@ -11,7 +11,6 @@ const Dashboard = () => {
     const fetchJobs = async () => {
       try {
         // Updated API endpoint with correct parameters
-        const response = await fetch('https://www.themuse.com/api/public/jobs?page=1&api_key=77556df5d11b91643b0ed92303429d01a7b93e8298b55087dbac0a6ca53ee899&category=Software%20Engineering');
 
         if (!response.ok) {
           console.error('Response status:', response.status);
