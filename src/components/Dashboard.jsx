@@ -10,18 +10,17 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        // Updated API endpoint with correct parameters
+        const apiResponse = await fetch(
+          `/api/jobs?page=1&category=Software%20Engineering`
+        );
 
-        if (!response.ok) {
-          console.error('Response status:', response.status);
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (!apiResponse.ok) {
+          throw new Error(`HTTP error! status: ${apiResponse.status}`);
         }
 
-        const data = await response.json();
-        console.log('API Response:', data); // Debug log
-
+        const data = await apiResponse.json();
+        
         if (data.results && data.results.length > 0) {
-          // Transform the data to match our component's expected format
           const formattedJobs = data.results.map(job => ({
             id: job.id,
             name: job.name,
@@ -44,24 +43,39 @@ const Dashboard = () => {
         }
       } catch (err) {
         console.error("API Error:", err);
-        // Provide more user-friendly error message
-        setError("Unable to load jobs at the moment. Please try again later.");
-        
-        // Set some sample data as fallback
+        // Fallback data in case of API failure
         const fallbackJobs = [
           {
             id: 1,
-            name: "Software Engineer",
-            company: { name: "Tech Company" },
-            locations: [{ name: "Remote" }],
-            levels: [{ name: "Entry Level" }],
+            name: "Senior Software Engineer",
+            company: { name: "KOD Tech" },
+            locations: [{ name: "New York, NY" }],
+            levels: [{ name: "Senior Level" }],
             categories: [{ name: "Software Engineering" }],
             refs: { landing_page: "#" }
           },
-          // Add more fallback jobs if needed
+          {
+            id: 2,
+            name: "Frontend Developer",
+            company: { name: "KOD Solutions" },
+            locations: [{ name: "Remote" }],
+            levels: [{ name: "Mid Level" }],
+            categories: [{ name: "Software Engineering" }],
+            refs: { landing_page: "#" }
+          },
+          {
+            id: 3,
+            name: "Junior Backend Developer",
+            company: { name: "KOD Systems" },
+            locations: [{ name: "San Francisco, CA" }],
+            levels: [{ name: "Entry Level" }],
+            categories: [{ name: "Software Engineering" }],
+            refs: { landing_page: "#" }
+          }
         ];
         setJobs(fallbackJobs);
         setFilteredJobs(fallbackJobs);
+        setError("Unable to load live jobs. Showing sample listings.");
       } finally {
         setLoading(false);
       }
@@ -110,8 +124,8 @@ const Dashboard = () => {
       <div className="relative z-10">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-black mb-2">KOD JOBS </h1>
-          <p className="text-black-600 text-xl">----Discover Your Next Career Opportunity----</p>
+          <h1 className="text-4xl font-bold text-white mb-2">KOD JOBS</h1>
+          <p className="text-white text-xl">Discover Your Next Career Opportunity</p>
         </div>
 
         {/* Filter buttons */}
@@ -136,7 +150,7 @@ const Dashboard = () => {
           {filteredJobs.map((job) => (
             <div 
               key={job.id} 
-              className="bg-slate-900 rounded-lg p-6 shadow-lg border border-white/20 h-[250px] flex flex-col justify-between"
+              className="bg-black rounded-lg p-6 shadow-lg border border-white/20 h-[250px] flex flex-col justify-between"
             >
               <div>
                 <div className="flex justify-between items-start mb-4">
@@ -173,7 +187,7 @@ const Dashboard = () => {
                   href={job.refs.landing_page} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  className="inline-flex items-center px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
                 >
                   Apply Now
                   <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -187,7 +201,7 @@ const Dashboard = () => {
 
         {filteredJobs.length === 0 && (
           <div className="text-center py-10 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg">
-            <p className="text-black text-xl font-bold">No jobs found for the selected filter.</p>
+            <p className="text-white text-xl font-bold">No jobs found for the selected filter.</p>
           </div>
         )}
       </div>
