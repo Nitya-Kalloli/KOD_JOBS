@@ -11,7 +11,12 @@ const Dashboard = () => {
     const fetchJobs = async () => {
       try {
         const apiResponse = await fetch(
-          `/api/jobs?page=1&category=Software%20Engineering`
+          `/api/jobs?page=1&category=Software%20Engineering`,
+          {
+            headers: {
+              'Authorization': `Bearer ${process.env.REACT_APP_API_KEY || '77556df5d11b91643b0ed92303429d01a7b93e8298b55087dbac0a6ca53ee899'}`
+            }
+          }
         );
 
         if (!apiResponse.ok) {
