@@ -128,8 +128,8 @@ const Dashboard = () => {
 
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-black mb-2">KOD JOBS</h1>
-          <p className="text-black-800 text-xl">----Discover Your Next Career Opportunity----</p>
+          <h1 className="text-4xl font-bold text-white mb-2">KOD JOBS</h1>
+          <p className="text-gray-300 text-xl">Discover Your Next Career Opportunity</p>
         </div>
 
         {/* Filter buttons */}
@@ -141,7 +141,7 @@ const Dashboard = () => {
               className={`px-4 py-2 rounded-lg transition-all ${
                 activeFilter === (level === 'All Jobs' ? 'all' : level)
                   ? 'bg-blue-600 text-white'
-                  : 'bg-white bg-opacity-10 text-white hover:bg-opacity-20'
+                  : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
               }`}
             >
               {level}
@@ -154,7 +154,7 @@ const Dashboard = () => {
           {filteredJobs.map((job) => (
             <div 
               key={job.id} 
-              className="bg-stone-800 bg-opacity-50 rounded-lg p-6 shadow-lg border border-gray-700 hover:border-gray-600 transition-all"
+              className="bg-stone-800 bg-opacity-80 rounded-lg p-6 shadow-lg border border-gray-700 hover:border-gray-500 transition-all"
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1 pr-4">
@@ -165,10 +165,10 @@ const Dashboard = () => {
                 </div>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap ${
                   job.levels[0]?.name === 'Entry Level' 
-                    ? 'bg-green-400 bg-opacity-20 text-green-400' 
+                    ? 'bg-green-500 bg-opacity-20 text-green-400' 
                     : job.levels[0]?.name === 'Mid Level'
-                    ? 'bg-blue-400 bg-opacity-20 text-blue-400'
-                    : 'bg-purple-400 bg-opacity-20 text-purple-400'
+                    ? 'bg-blue-500 bg-opacity-20 text-blue-400'
+                    : 'bg-purple-500 bg-opacity-20 text-purple-400'
                 }`}>
                   {job.levels[0]?.name}
                 </span>
