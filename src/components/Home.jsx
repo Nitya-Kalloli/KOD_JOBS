@@ -4,15 +4,6 @@ import { useNavigate } from 'react-router-dom';
 const inputStyles = "w-72 p-2 rounded-lg bg-slate-800/50 border border-slate-600 focus:border-slate-400 outline-none transition-colors duration-300 text-sm placeholder:text-slate-500";
 const buttonStyles = "w-72 p-2 rounded-lg font-semibold transition-all duration-300 text-sm";
 
-const backgroundStyle = {
-  backgroundImage: `
-    linear-gradient(to bottom right, rgba(15, 23, 42, 0.97), rgba(30, 41, 59, 0.97)),
-    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23475569' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
-  `,
-  backgroundSize: '600px 600px',
-  backgroundPosition: 'center',
-};
-
 const Home = () => {
   const [loginData, setLoginData] = useState({ name: '', password: '' });
   const [signupData, setSignupData] = useState({
@@ -25,18 +16,25 @@ const Home = () => {
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const navigate = useNavigate();
 
-  // Handle Enter key for login
-  const handleLoginKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleLogin(e);
-    }
+  // Validation functions
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
   };
 
-  // Handle Enter key for signup
-  const handleSignupKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSignup(e);
+  const validatePassword = (password) => {
+    return password.length >= 6;
+  };
+
+  const validateAge = (dob) => {
+    const today = new Date();
+    const birthDate = new Date(dob);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
     }
+    return age >= 18;
   };
 
   const handleLogin = (e) => {
@@ -46,6 +44,7 @@ const Home = () => {
     const user = users.users.find(u => u.name === loginData.name && u.password === loginData.password);
     
     if (user) {
+      localStorage.setItem('currentUser', JSON.stringify(user));
       navigate('/dashboard');
     } else {
       alert('Invalid credentials. Please try again.');
@@ -55,35 +54,55 @@ const Home = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     
+    // Validate all fields are filled
     if (!signupData.name || !signupData.password || !signupData.dob || !signupData.email) {
       alert("Please fill all fields");
       return;
     }
 
+    // Validate email format
+    if (!validateEmail(signupData.email)) {
+      alert("Please enter a valid email address");
+      return;
+    }
+
+    // Validate password strength
+    if (!validatePassword(signupData.password)) {
+      alert("Password must be at least 6 characters long");
+      return;
+    }
+
+    // Validate age
+    if (!validateAge(signupData.dob)) {
+      alert("You must be 18 or older to register");
+      return;
+    }
+
     try {
-      const response = await fetch('http://localhost:5000/api/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: signupData.name,
-          password: signupData.password,
-          dob: signupData.dob,
-          email: signupData.email
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create account');
+      const users = JSON.parse(localStorage.getItem('users') || '{"users": []}');
+      
+      // Check for duplicate username
+      if (users.users.some(user => user.name === signupData.name)) {
+        alert("Username already exists. Please choose another one.");
+        return;
       }
 
-      // Also store in localStorage for client-side auth
-      const users = JSON.parse(localStorage.getItem('users') || '{"users": []}');
-      users.users.push(data.user);
+      // Check for duplicate email
+      if (users.users.some(user => user.email === signupData.email)) {
+        alert("Email already registered. Please use another email.");
+        return;
+      }
+
+      const newUser = {
+        name: signupData.name,
+        password: signupData.password,
+        dob: signupData.dob,
+        email: signupData.email,
+        id: Date.now()
+      };
+      users.users.push(newUser);
       localStorage.setItem('users', JSON.stringify(users));
+      localStorage.setItem('currentUser', JSON.stringify(newUser));
 
       alert('Account created successfully!');
       navigate('/dashboard');
@@ -93,25 +112,27 @@ const Home = () => {
     }
   };
 
+  // Handle Enter key for login and signup
+  const handleKeyPress = (e, handler) => {
+    if (e.key === 'Enter') {
+      handler(e);
+    }
+  };
+
   return (
-    <div className="min-h-screen text-white" style={backgroundStyle}>
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="rounded-2xl border border-slate-700 bg-slate-800/50 backdrop-blur-sm p-6 mb-8 shadow-lg max-w-3xl mx-auto">
-          <h1 className="text-3xl md:text-4xl text-slate-200 text-center font-bold">
-            Welcome to KOD JOBS
-          </h1>
-          <p className="text-center text-slate-400 mt-2 text-sm">
-            Your Gateway to Career Opportunities
-          </p>
-        </div>
-        
-        <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#1a1f2e] p-6">
+      {/* Welcome Text */}
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold text-white mb-2">Welcome to KOD JOBS</h1>
+        <p className="text-gray-400">Your Gateway to Career Opportunities</p>
+      </div>
+
+      <div className="w-full max-w-6xl">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left Side - Image */}
-          <div className="hidden md:block h-full">
-            <div className="relative h-[600px] flex flex-col justify-center">
-              <div className="absolute -inset-1 bg-slate-500/10 rounded-lg blur"></div>
-              <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 p-6 rounded-t-lg z-10">
+          <div className="hidden md:block">
+            <div className="relative">
+              <div className="absolute top-0 left-0 right-0 p-6">
                 <h2 className="text-2xl font-bold text-black mb-2">
                   Find Your Dream Job
                 </h2>
@@ -120,46 +141,44 @@ const Home = () => {
                 </p>
               </div>
               <img 
-                src="./woman-laptop.png"
+                src="/woman-laptop.png"
                 alt="Woman working"
-                className="relative rounded-lg shadow-2xl transform hover:scale-[1.01] transition-transform duration-300 object-cover h-full w-full"
+                className="rounded-lg"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://placehold.co/600x400?text=Welcome';
+                }}
               />
             </div>
           </div>
           
           {/* Right Side - Forms */}
-          <div className="space-y-8 bg-slate-800/50 backdrop-blur-sm p-8 rounded-xl shadow-lg border border-slate-700 h-[600px] flex flex-col justify-center">
+          <div className="space-y-8 bg-[#1e2536] p-8 rounded-xl">
             {/* Login Form */}
-            <div className="space-y-4 flex flex-col items-center">
-              <div className="flex items-center gap-3 w-full">
-                <div className="h-px flex-1 bg-slate-700"></div>
-                <h2 className="text-xl font-semibold text-slate-200 text-center">
-                  Login
-                </h2>
-                <div className="h-px flex-1 bg-slate-700"></div>
-              </div>
-              <div className="space-y-3 w-full flex flex-col items-center">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-white text-center">Login</h2>
+              <div className="space-y-3">
                 <input
                   type="text"
                   placeholder="Enter your username"
-                  className={inputStyles}
+                  className="w-full p-2 rounded-lg bg-[#272e42] border border-[#374151] focus:border-blue-500 outline-none text-white text-sm"
                   value={loginData.name}
                   onChange={(e) => setLoginData({...loginData, name: e.target.value})}
-                  onKeyPress={handleLoginKeyPress}
+                  onKeyPress={(e) => handleKeyPress(e, handleLogin)}
                 />
-                <div className="relative w-72">
+                <div className="relative">
                   <input
                     type={showLoginPassword ? "text" : "password"}
                     placeholder="Enter your password"
-                    className={inputStyles}
+                    className="w-full p-2 rounded-lg bg-[#272e42] border border-[#374151] focus:border-blue-500 outline-none text-white text-sm"
                     value={loginData.password}
                     onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                    onKeyPress={handleLoginKeyPress}
+                    onKeyPress={(e) => handleKeyPress(e, handleLogin)}
                   />
                   <button
                     type="button"
                     onClick={() => setShowLoginPassword(!showLoginPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                   >
                     {showLoginPassword ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,7 +192,10 @@ const Home = () => {
                     )}
                   </button>
                 </div>
-                <button onClick={handleLogin} className={buttonStyles}>
+                <button 
+                  onClick={handleLogin} 
+                  className="w-full p-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+                >
                   Login
                 </button>
               </div>
@@ -181,35 +203,29 @@ const Home = () => {
 
             {/* Signup Form */}
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="h-px flex-1 bg-slate-700"></div>
-                <h2 className="text-xl font-semibold text-slate-200 text-center">
-                  Sign Up
-                </h2>
-                <div className="h-px flex-1 bg-slate-700"></div>
-              </div>
-              <div className="space-y-3 flex flex-col items-center">
+              <h2 className="text-xl font-semibold text-white text-center">Sign Up</h2>
+              <div className="space-y-3">
                 <input
                   type="text"
                   placeholder="Choose a username"
-                  className={inputStyles}
+                  className="w-full p-2 rounded-lg bg-[#272e42] border border-[#374151] focus:border-blue-500 outline-none text-white text-sm"
                   value={signupData.name}
                   onChange={(e) => setSignupData({...signupData, name: e.target.value})}
-                  onKeyPress={handleSignupKeyPress}
+                  onKeyPress={(e) => handleKeyPress(e, handleSignup)}
                 />
-                <div className="relative w-72">
+                <div className="relative">
                   <input
                     type={showSignupPassword ? "text" : "password"}
-                    placeholder="Create a password"
-                    className={inputStyles}
+                    placeholder="Create a password (min. 6 characters)"
+                    className="w-full p-2 rounded-lg bg-[#272e42] border border-[#374151] focus:border-blue-500 outline-none text-white text-sm"
                     value={signupData.password}
                     onChange={(e) => setSignupData({...signupData, password: e.target.value})}
-                    onKeyPress={handleSignupKeyPress}
+                    onKeyPress={(e) => handleKeyPress(e, handleSignup)}
                   />
                   <button
                     type="button"
                     onClick={() => setShowSignupPassword(!showSignupPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                   >
                     {showSignupPassword ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -226,18 +242,21 @@ const Home = () => {
                 <input
                   type="date"
                   placeholder="Date of birth"
-                  className={`${inputStyles} text-slate-400`}
+                  className="w-full p-2 rounded-lg bg-[#272e42] border border-[#374151] focus:border-blue-500 outline-none text-white text-sm"
                   value={signupData.dob}
                   onChange={(e) => setSignupData({...signupData, dob: e.target.value})}
                 />
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className={inputStyles}
+                  className="w-full p-2 rounded-lg bg-[#272e42] border border-[#374151] focus:border-blue-500 outline-none text-white text-sm"
                   value={signupData.email}
                   onChange={(e) => setSignupData({...signupData, email: e.target.value})}
                 />
-                <button onClick={handleSignup} className={`${buttonStyles} border border-slate-600 text-slate-200 hover:bg-slate-700`}>
+                <button 
+                  onClick={handleSignup} 
+                  className="w-full p-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+                >
                   Create Account
                 </button>
               </div>
